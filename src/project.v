@@ -7,10 +7,10 @@
 
 module tt_um_uwasic_onboarding_punchdii (
     assign uio_oe = 8'hFF; // Set all IOs to output
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
-    input  wire [7:0] uio_in,   // IOs: Input path
-    output wire [7:0] uio_out,  // IOs: Output path
+    input  wire [7:0] ui_in,    // Dedicated inputs // ui_in[1] is MOSI, [2] is nCS,[0] is clk
+    output wire [7:0] uo_out,   // Dedicated outputs //output 8 bit 
+    input  wire [7:0] uio_in,   // IOs: Input path  
+    output wire [7:0] uio_out,  // IOs: Output path  //output 8 bit
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
@@ -25,6 +25,13 @@ module tt_um_uwasic_onboarding_punchdii (
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
 
+  wire [7:0] en_reg_out_7_0;
+  wire [7:0] en_reg_out_15_8;
+  wire [7:0] en_reg_pwm_7_0;
+  wire [7:0] en_reg_pwm_15_8;
+  wire [7:0] pwm_duty_cycle;
+
+
 
   pwm_peripheral pwm_peripheral_inst (
     .clk(clk),
@@ -37,4 +44,19 @@ module tt_um_uwasic_onboarding_punchdii (
     .out({uio_out, uo_out})
   );
 
+  
+  spi_peripheral spi_peripheral_inst (
+    .clk(clk),
+    .rst_n(rst_n),
+    .COPI(ui_in[1]),
+    .nCS(ui_in[2]),
+    .SCLK(ui_in[0]),
+    .en_reg_out_7_0(en_reg_out_7_0),
+    .en_reg_out_15_8(en_reg_out_15_8),
+    .en_reg_pwm_7_0(en_reg_pwm_7_0),
+    .en_reg_pwm_15_8(en_reg_pwm_15_8),
+    .pwm_duty_cycle(pwm_duty_cycle),
+  );
+
+  
 endmodule
